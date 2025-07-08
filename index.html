@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>空圧先生アプリ20250708</title>
+    <title>空圧先生アプリ 画面設計書 (全機能実装版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <style>
@@ -14,6 +14,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden; /* Prevent body scrollbars */
+            touch-action: manipulation;
         }
         #app-wrapper {
             display: flex;
@@ -43,6 +44,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: manipulation;
         }
         .key:active {
             transform: translateY(1px);
@@ -64,12 +66,11 @@
             border: 1px solid #9ca3af;
             border-radius: 4px;
             padding: 4px;
-            font-size: max(11px, 16px);
+            font-size: 16px;
             text-align: center;
             line-height: 1.2;
             transition: all 0.1s ease;
-            -webkit-appearance: none;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         .program-card-button:active {
             background-color: #d1d5db;
@@ -105,19 +106,12 @@
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             font-size: 16px;
             -webkit-appearance: none;
-            -webkit-tap-highlight-color: transparent;
         }
         #display-area.function-result-mode #display {
             display: none;
         }
         #display-area.function-result-mode #sub-display-container {
             height: 100%;
-        }
-        /* Mobile optimization */
-        button, input, select {
-            font-size: max(16px, 1rem);
-            -webkit-appearance: none;
-            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -670,7 +664,8 @@
         const maxScroll = Math.max(0, subDisplayContent.scrollHeight - subDisplayContainer.clientHeight);
         scrollDownIndicator.style.visibility = subDisplayScrollTop < maxScroll ? 'visible' : 'hidden';
     }
-
+    
+    // --- Modal HTML Generation ---
     function createModal(id, title, content) {
         return `
             <div id="modal-${id}" class="modal absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
@@ -686,8 +681,7 @@
                 </div>
             </div>`;
     }
-    
-    // --- Modal HTML Generation ---
+
     function createAllModals() {
         const modalContainer = document.getElementById('modal-container');
         modalContainer.innerHTML = `
@@ -822,17 +816,15 @@
         renderDisplayWithCursor();
         adjustAppScale();
     });
-
     window.addEventListener('resize', adjustAppScale);
 </script>
-
 </body>
 </html>
     <script id="html_badge_script1">
         window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
-            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDv30pqDL3Xc%2FADuSbUC8lXrz36ec4GrDseQAiFszeOqqyGzPi%2BM38%2B2ZF1%2Fo9VbTCzSreljaive1%2BZ4oonkSiJo4Z0MXzdMtjYF%2FgP2Cqpcy2tKQVMfELLs6md%2BJk7gU6oSKubxmy1aQWa4ojO0BqjWgzAxaMK873jTqtalrUc4LyYujnb1XdLs3MiuoFXUi%2FAXftVNbjZzG2PswHJGyFkQO4KgNhMAzcmACwC6WQ8VOgQY%2Bh%2BFLbRZxRUqfZdCvfVMG7ZtS%2BF1qTl01VmddawUxUWOJEYRqUjHCwzNsYQ48LbHHTqcH0pmy3MTPH%2B5OvA1qWDipwOHRM5ptXBNSNSugswXNJR%2Fx3z9NwDxRlustQE4UeZPHAhYPJHGHYDtTIvJWS540gS%2FzeC3fOXi7lOGjot%2BdkIFx53bUGnhVJLxBDkaj5R49SW6wodjPEyWo9cbaPMcWbf3qJ9hNhOk9EYIeU9Px8G0p22O%2B%2FYC5KExoAhLUnZ0DsLxgGPsKSGG0uoX%2FT36Gtw0vnmZ%2F8xOg%2BmE%3D";
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDrFVlpfld4tueQh%2F2eoD%2FYIRp2RSWOpM3S%2FbU0cXiI9Ut0w1Ez1ywn4UZ022cPM2vDYG0bNYXQa%2BkZdDC%2FW76YlhoWvb4cBe4YVXw8z1YGYBl04PM3nLkzGQW6WjzUx%2FJC83MwOIauNQaGs6DhsVn9OZjjqaSd5%2BZzqrUhBokEbYRKuuK9LllIapqDE8zfGJwJZvB3obb6bNOqhOUFRWJ7MI3bn2BZ%2BN%2BMHtNU4zSQhzL84T4XxaiUgXrAn27xMmZuOVJPK8cY1%2FylAI%2BVywINEc%2Bdv4FMxRHSYeN1qrg5JSwHIsNKEIIcX4B9QTuzC7sYYcT3A%2FZFkEicDZ9r9YNkfyG00qf0lfw8WUI%2FuCU65gkQjziqyXomDiUR4bdtYPobuELy7JevRdJRwKXTUGcJ8CG5nkfL4UPRwl1DaaZuF2zS2xPAyHoEUVyW1eM2oj957797IAQtYf903oD3SnsNtRTZSueYQoNZo1mx%2B6FRp4nbQv85%2BMDT6o%2FJrZ%2FPEogWNYFZQJVZGtRc9YXMVW2pc%3D";
         window.__genspark_locale = "ja-JP";
-        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDv30pqDL3Xc/ADuSbUC8lXrz36ec4GrDseQAiFszeOqqyGzPi+M38+2ZF1/o9VbTCzSreljaive1+Z4oonkSiJo4Z0MXzdMtjYF/gP2Cqpcy2tKQVMfELLs6md+Jk7gU6oSKubxmy1aQWa4ojO0BqjWgzAxaMK873jTqtalrUc4LyYujnb1XdLs3MiuoFXUi/AXftVNbjZzG2PswHJGyFkQO4KgNhMAzcmACwC6WQ8VOgQY+h+FLbRZxRUqfZdCvfVMG7ZtS+F1qTl01VmddawUxUWOJEYRqUjHCwzNsYQ48LbHHTqcH0pmy3MTPH+5OvA1qWDipwOHRM5ptXBNSNSugswXNJR/x3z9NwDxRlustQE4UeZPHAhYPJHGHYDtTIvJWS540gS/zeC3fOXi7lOGjot+dkIFx53bUGnhVJLxBDkaj5R49SW6wodjPEyWo9cbaPMcWbf3qJ9hNhOk9EYIeU9Px8G0p22O+/YC5KExoAhLUnZ0DsLxgGPsKSGG0uoX/T36Gtw0vnmZ/8xOg+mE=";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDrFVlpfld4tueQh/2eoD/YIRp2RSWOpM3S/bU0cXiI9Ut0w1Ez1ywn4UZ022cPM2vDYG0bNYXQa+kZdDC/W76YlhoWvb4cBe4YVXw8z1YGYBl04PM3nLkzGQW6WjzUx/JC83MwOIauNQaGs6DhsVn9OZjjqaSd5+ZzqrUhBokEbYRKuuK9LllIapqDE8zfGJwJZvB3obb6bNOqhOUFRWJ7MI3bn2BZ+N+MHtNU4zSQhzL84T4XxaiUgXrAn27xMmZuOVJPK8cY1/ylAI+VywINEc+dv4FMxRHSYeN1qrg5JSwHIsNKEIIcX4B9QTuzC7sYYcT3A/ZFkEicDZ9r9YNkfyG00qf0lfw8WUI/uCU65gkQjziqyXomDiUR4bdtYPobuELy7JevRdJRwKXTUGcJ8CG5nkfL4UPRwl1DaaZuF2zS2xPAyHoEUVyW1eM2oj957797IAQtYf903oD3SnsNtRTZSueYQoNZo1mx+6FRp4nbQv85+MDT6o/JrZ/PEogWNYFZQJVZGtRc9YXMVW2pc=";
     </script>
     
     <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
