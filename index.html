@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>空圧先生アプリ 画面設計書 (全機能実装版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
@@ -64,10 +64,12 @@
             border: 1px solid #9ca3af;
             border-radius: 4px;
             padding: 4px;
-            font-size: 11px;
+            font-size: max(11px, 16px);
             text-align: center;
             line-height: 1.2;
             transition: all 0.1s ease;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
         }
         .program-card-button:active {
             background-color: #d1d5db;
@@ -101,12 +103,21 @@
             border-color: #d1d5db;
             border-radius: 0.375rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            font-size: 16px;
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
         }
         #display-area.function-result-mode #display {
             display: none;
         }
         #display-area.function-result-mode #sub-display-container {
             height: 100%;
+        }
+        /* Mobile optimization */
+        button, input, select {
+            font-size: max(16px, 1rem);
+            -webkit-appearance: none;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -659,6 +670,22 @@
         const maxScroll = Math.max(0, subDisplayContent.scrollHeight - subDisplayContainer.clientHeight);
         scrollDownIndicator.style.visibility = subDisplayScrollTop < maxScroll ? 'visible' : 'hidden';
     }
+
+    function createModal(id, title, content) {
+        return `
+            <div id="modal-${id}" class="modal absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
+                <div class="modal-content bg-gray-100 rounded-lg shadow-xl w-full max-w-sm p-6 border-2 border-gray-300">
+                    <form id="form-${id}" onsubmit="return false;">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">${title}</h2>
+                        <div class="space-y-3 text-sm">${content}</div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button type="button" onclick="closeModal('${id}')" class="key bg-gray-300 text-gray-800 px-4 py-2 font-medium">キャンセル</button>
+                            <button type="button" onclick="executeCalculation('${id}')" class="key bg-blue-600 text-white px-4 py-2 font-bold">計算</button>
+                        </div>
+                    </form>
+                </div>
+            </div>`;
+    }
     
     // --- Modal HTML Generation ---
     function createAllModals() {
@@ -744,22 +771,6 @@
         `;
     }
 
-    function createModal(id, title, content) {
-        return `
-            <div id="modal-${id}" class="modal absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden">
-                <div class="modal-content bg-gray-100 rounded-lg shadow-xl w-full max-w-sm p-6 border-2 border-gray-300">
-                    <form id="form-${id}" onsubmit="return false;">
-                        <h2 class="text-xl font-bold mb-4 text-gray-800">${title}</h2>
-                        <div class="space-y-3 text-sm">${content}</div>
-                        <div class="mt-6 flex justify-end space-x-3">
-                            <button type="button" onclick="closeModal('${id}')" class="key bg-gray-300 text-gray-800 px-4 py-2 font-medium">キャンセル</button>
-                            <button type="button" onclick="executeCalculation('${id}')" class="key bg-blue-600 text-white px-4 py-2 font-bold">計算</button>
-                        </div>
-                    </form>
-                </div>
-            </div>`;
-    }
-
     function generateCylinderInputs(count) {
         const container = document.getElementById('p4-cylinder-inputs');
         if (!container) return;
@@ -778,7 +789,16 @@
         }
     }
 
-    // --- Responsive Scaling ---
+    function toggleSizeLock() {
+        isSizeLocked = !isSizeLocked;
+        lockIcon.classList.toggle('hidden', isSizeLocked);
+        unlockIcon.classList.toggle('hidden', !isSizeLocked);
+        if (!isSizeLocked) {
+            adjustAppScale();
+        }
+        updateSubDisplay(isSizeLocked ? '画面サイズ固定 ON' : '画面サイズ固定 OFF', true);
+    }
+
     function adjustAppScale() {
         if (isSizeLocked) return;
         const appContainer = document.getElementById('app-container');
@@ -795,16 +815,6 @@
 
         appContainer.style.transform = `scale(${scale})`;
     }
-    
-    function toggleSizeLock() {
-        isSizeLocked = !isSizeLocked;
-        lockIcon.classList.toggle('hidden', isSizeLocked);
-        unlockIcon.classList.toggle('hidden', !isSizeLocked);
-        if (!isSizeLocked) {
-            adjustAppScale();
-        }
-        updateSubDisplay(isSizeLocked ? '画面サイズ固定 ON' : '画面サイズ固定 OFF', true);
-    }
 
     document.addEventListener('DOMContentLoaded', () => {
         createAllModals();
@@ -812,8 +822,18 @@
         renderDisplayWithCursor();
         adjustAppScale();
     });
-    window.addEventListener('resize', adjustAppScale);
 
+    window.addEventListener('resize', adjustAppScale);
 </script>
+
 </body>
 </html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDv30pqDL3Xc%2FADuSbUC8lXrz36ec4GrDseQAiFszeOqqyGzPi%2BM38%2B2ZF1%2Fo9VbTCzSreljaive1%2BZ4oonkSiJo4Z0MXzdMtjYF%2FgP2Cqpcy2tKQVMfELLs6md%2BJk7gU6oSKubxmy1aQWa4ojO0BqjWgzAxaMK873jTqtalrUc4LyYujnb1XdLs3MiuoFXUi%2FAXftVNbjZzG2PswHJGyFkQO4KgNhMAzcmACwC6WQ8VOgQY%2Bh%2BFLbRZxRUqfZdCvfVMG7ZtS%2BF1qTl01VmddawUxUWOJEYRqUjHCwzNsYQ48LbHHTqcH0pmy3MTPH%2B5OvA1qWDipwOHRM5ptXBNSNSugswXNJR%2Fx3z9NwDxRlustQE4UeZPHAhYPJHGHYDtTIvJWS540gS%2FzeC3fOXi7lOGjot%2BdkIFx53bUGnhVJLxBDkaj5R49SW6wodjPEyWo9cbaPMcWbf3qJ9hNhOk9EYIeU9Px8G0p22O%2B%2FYC5KExoAhLUnZ0DsLxgGPsKSGG0uoX%2FT36Gtw0vnmZ%2F8xOg%2BmE%3D";
+        window.__genspark_locale = "ja-JP";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDv30pqDL3Xc/ADuSbUC8lXrz36ec4GrDseQAiFszeOqqyGzPi+M38+2ZF1/o9VbTCzSreljaive1+Z4oonkSiJo4Z0MXzdMtjYF/gP2Cqpcy2tKQVMfELLs6md+Jk7gU6oSKubxmy1aQWa4ojO0BqjWgzAxaMK873jTqtalrUc4LyYujnb1XdLs3MiuoFXUi/AXftVNbjZzG2PswHJGyFkQO4KgNhMAzcmACwC6WQ8VOgQY+h+FLbRZxRUqfZdCvfVMG7ZtS+F1qTl01VmddawUxUWOJEYRqUjHCwzNsYQ48LbHHTqcH0pmy3MTPH+5OvA1qWDipwOHRM5ptXBNSNSugswXNJR/x3z9NwDxRlustQE4UeZPHAhYPJHGHYDtTIvJWS540gS/zeC3fOXi7lOGjot+dkIFx53bUGnhVJLxBDkaj5R49SW6wodjPEyWo9cbaPMcWbf3qJ9hNhOk9EYIeU9Px8G0p22O+/YC5KExoAhLUnZ0DsLxgGPsKSGG0uoX/T36Gtw0vnmZ/8xOg+mE=";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
